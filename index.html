@@ -236,7 +236,7 @@ if(RA.ok&&s[alt]>0){out[alt].push(RA.a);return}
 out.other.push({h:hh,r:r.map(String),why:R.why||("ناقص: "+R.miss.join("، ")),sug:PROF[pk].t,d:d,f:fn})});
 return out}
 function reqMapped(ix,pk){return PF(pk).filter(function(f){return f.r&&ix[f.k]>-1}).length}
-function detect(){var ixA=mapFor("asset"),ixD=mapFor("device"),ra=reqMapped(ixA,"asset"),rd=reqMapped(ixD,"device");
+function detect(){var c=classify();if(c.asset.length!=c.device.length)return c.asset.length>c.device.length?"asset":"device";var ixA=mapFor("asset"),ixD=mapFor("device"),ra=reqMapped(ixA,"asset"),rd=reqMapped(ixD,"device");
 var s={asset:0,device:0},N=Math.min(XROWS.length,300);for(var i=0;i<N;i++){var c=score(XROWS[i],ixA,ixD);s.asset+=c.asset;s.device+=c.device}
 if(s.asset!=s.device&&Math.max(s.asset,s.device)>=N)return s.asset>s.device?"asset":"device";
 if(ra!=rd)return ra>rd?"asset":"device";
@@ -275,6 +275,7 @@ a=a.filter(function(x){return x.some(function(c){return String(c).trim()!==""})}
 if(a.length<2){xm("الملف فاضي أو ما فيه صفوف بيانات",1);return}
 XHEAD=a[0].map(String);XROWS=a.slice(1);XFN=f.name;$("mp").hidden=true;var dp=detect(),sw=dp!=CUR;if(sw){CUR=dp;build()}bmap();xm("تمت قراءة "+XROWS.length+" صف، وتم التعرف على الملف كـ: "+PROF[CUR].t+(sw?" (تم التحويل تلقائيًا)":"")+". راجع الأعمدة المقابلة ثم اضغط إضافة",0)}catch(err){xm("تعذر قراءة الملف",1)}};r.readAsArrayBuffer(f)};
 $("xadd").onclick=function(){if(auto()){var c=classify();c.asset.forEach(function(a){LISTS.asset.push(a)});c.device.forEach(function(a){LISTS.device.push(a)});c.other.forEach(function(o){OTHER.push(o)});
+var best=c.asset.length>c.device.length?"asset":c.device.length>c.asset.length?"device":CUR;if(best!=CUR){CUR=best;build()}
 xm("أصول: "+c.asset.length+"، أجهزة: "+c.device.length+"، غير مصنّف / غير مدرج: "+c.other.length,c.other.length?1:0);
 $("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList();drawOther();return}
 var ix=MV(),need=P().sh.filter(function(f){return req(f)&&ix[f.k]<0&&!pageV(f)});
