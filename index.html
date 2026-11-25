@@ -83,6 +83,13 @@ header{flex-wrap:wrap}
 
 .auto{display:flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}.auto input{width:auto}
 .na{color:#d93025;font-weight:700}
+.seg{display:flex;width:100%;background:#fff;border:1px solid #dde2e7;border-radius:10px;overflow:hidden}
+.seg .sg{flex:1 1 0;min-width:0;margin:0;background:#fff;color:#4a5560;border:0;border-radius:0;padding:11px 6px;font-size:13px;font-weight:500;letter-spacing:.06em;transition:background-color .22s ease,color .22s ease}
+.seg .sg+.sg{border-left:1px solid #edf0f3}
+.seg .sg:hover{background:#f6f8fa}
+.seg .sg.on,.seg .sg.on:hover{background:var(--c);color:#fff;font-weight:700}
+.seg .sg:focus-visible{outline:2px solid var(--c);outline-offset:-2px}
+input.bad+.seg{border-color:var(--danger)}
 .lk{background:none;color:var(--blue);padding:4px 0;font-weight:500;font-size:13px;text-decoration:underline;margin-top:4px}</style>
 </head>
 <body>
@@ -109,7 +116,7 @@ header{flex-wrap:wrap}
 <section id="done" class="done" hidden><div class="ck">✓</div><h2 id="dn"></h2><p class="hint">تم حفظ البيانات في Google Sheet</p><button class="add" id="again" type="button">تسجيل جديد</button></section>
 <button class="send" id="send" type="button" disabled>إرسال الكل</button>
 <div id="msg" role="status"></div>
-<p class="hint" id="ver" style="text-align:center;opacity:.6">إصدار الصفحة: 2026-11-25 (5)</p>
+<p class="hint" id="ver" style="text-align:center;opacity:.6">إصدار الصفحة: 2026-11-25 (6)</p>
 </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -126,12 +133,12 @@ function F(k,l,h,t,r,o,x){return{k:k,l:l,h:h,t:t,r:r,o:o,x:x}}
 var PROF={
 asset:{t:"أصل (Asset)",d:"مضخات، عدادات، صمامات، لوحات... داخل المواقع",sheet:"Assets",rt:"بيانات الأصل",
 sh:[F("dp","الإدارة","Department","dp"),F("bu","Business Unit","Business unit","bu",1),F("st","Site type","Site type","st",1),F("sn","Site name","Site name","sn",1)],
-rw:[F("at","نوع الأصل","Asset type","text",1),F("an","اسم الأصل","Asset name","combo",1),F("si","Site ID","Site ID","sid"),F("sr","الرقم التسلسلي","Serial Number","text",1),F("dt","تاريخ التركيب","Installation date","date"),F("wy","نهاية التصنيع / الدعم (EOL / EOS)","EOL / EOS date","date"),F("mc","رقم تواصل المصنّع","Manufacturer contact","tel"),F("gp","الإحداثيات","Coordinates","coord"),F("nt","ملاحظات","Notes","area")]},
+rw:[F("at","نوع الأصل","Asset type","text",1),F("an","اسم الأصل","Asset name","combo",1),F("si","Site ID","Site ID","sid"),F("sr","الرقم التسلسلي","Serial Number","text",1),F("dt","تاريخ التركيب","Installation date","date"),F("wy","نهاية التصنيع / الدعم (EOL / EOS)","EOL / EOS date","date"),F("mc","رقم تواصل المصنّع","Manufacturer contact","tel",1),F("mc2","رقم تواصل إضافي للمصنّع","Additional manufacturer contact","tel",0,0,"mc"),F("gp","الإحداثيات","Coordinates","coord",1),F("nt","ملاحظات","Notes","area")]},
 device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدفق، ضغط، PRV، صمامات... مع أجهزتها",sheet:"Devices",rt:"بيانات الجهاز",
-sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","text"),F("ds","الحي (District)","District","text"),F("gp","إحداثيات الموقع","Location coordinates","coord"),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","sel",1,["Ready","Issue","Issues","Hold"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel"),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
+sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","combo"),F("ds","الحي (District)","District","combo"),F("gp","إحداثيات الموقع","Location coordinates","coord",1),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","seg",1,["Issues","Hold","Ready"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel",1),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
 rw:[F("dty","نوع الجهاز","Device Type","text",1),F("dsr","الرقم التسلسلي للجهاز","Device Serial Number","text",1),F("sty","نوع الحساس","Sensor type","text"),F("sim","الرقم التسلسلي للشريحة","Serial SIM","text"),F("ex","تاريخ انتهاء الجهاز","Equipment Expiry Date","date")]}};
-var AL={bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
-var NA="*N/A*",XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
+var AL={mc2:["additionalmanufacturer","manufacturercontact2"],mc:["manufacturer"],bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
+var SEGC={Issues:"#D94343",Hold:"#91A9B8",Ready:"#27965C"},AREAS=["Area 1","Area 2","Area 3","Area 4","Area 5","Area 6","Area 7"],NA="*N/A*",XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
 var MAPH='<div class="gb"><div class="map" id="map"><span>الخريطة تظهر بعد إدخال الإحداثيات</span></div><div><p class="hint" id="gh"></p><a id="gl" href="#" target="_blank" rel="noopener" hidden>فتح في خرائط Google</a></div></div>';
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -150,8 +157,9 @@ function fh(f){var id="f_"+f.k,t=f.t,x,xs=ALLF().filter(function(g){return g.x==
 if(t=="dp")x='<select id="'+id+'"><option value="">اختر</option>'+opt(DEPTS)+'</select>';
 else if(t=="bu")x='<select id="'+id+'"><option value="">اختر</option>'+opt(Object.keys(SITES))+'</select>';
 else if(t=="st")x='<select id="'+id+'" disabled><option value="">اختر</option></select>';
+else if(t=="seg")x='<input type="hidden" id="'+id+'"><div class="seg" dir="ltr" role="radiogroup" aria-label="'+esc(f.l)+'">'+f.o.map(function(o){return '<button type="button" class="sg" role="radio" aria-checked="false" data-sg="'+f.k+'" data-val="'+esc(o)+'" style="--c:'+(SEGC[o]||"#27965C")+'">'+esc(o.toUpperCase())+'</button>'}).join("")+'</div>';
 else if(t=="sel")x='<select id="'+id+'"><option value="">اختر</option>'+opt(f.o)+'</select>';
-else if(t=="sn"||t=="combo")x='<input id="'+id+'" list="dl_'+f.k+'"'+(t=="sn"?' disabled':'')+' placeholder="ابحث أو اكتب اسمًا جديدًا"><datalist id="dl_'+f.k+'"></datalist>';
+else if(t=="sn"||t=="combo")x='<input id="'+id+'" list="dl_'+f.k+'"'+(t=="sn"?' disabled':'')+' placeholder="'+(f.k=="ar"||f.k=="ds"?"اختر من القائمة أو اكتب":"ابحث أو اكتب اسمًا جديدًا")+'"><datalist id="dl_'+f.k+'"></datalist>';
 else if(t=="sid")x='<div class="stepper"><button type="button" data-s="-1">&minus;</button><input id="'+id+'" data-d="1" inputmode="numeric" maxlength="9" value="'+(f.r?"":"0001")+'" placeholder="0001" dir="ltr"><button type="button" data-s="1">+</button></div>';
 else if(t=="area")x='<textarea id="'+id+'" rows="2"></textarea>';
 else x='<input id="'+id+'"'+(t=="tel"?' data-d="1" inputmode="numeric" dir="ltr"':t=="date"?' type="date"':t=="email"?' dir="ltr" placeholder="a@x.com; b@x.com"':t=="coord"?' dir="ltr" placeholder="24.7136, 46.6753"':'')+'>';
@@ -166,6 +174,8 @@ $("lb").hidden=false;$("done").hidden=true;stL.p=0;geo();drawList()}
 function dl(){ALLF().forEach(function(f){var d=$("dl_"+f.k);if(!d)return;var a=[];
 if(f.t=="sn")a=NAMES[$("f_st").value]||[];
 else if(f.k=="sn")a=ALLN();
+else if(f.k=="ar"){var o2={};AREAS.concat(vals("ar")).forEach(function(x){o2[x]=1});a=Object.keys(o2)}
+else if(f.k=="ds")a=vals("ds");
 else if(f.k=="an"){var o={};ASSET_NAMES.concat(LIST().map(function(x){return x.an})).forEach(function(x){if(x)o[x]=1});a=Object.keys(o).sort()}
 d.innerHTML=a.map(function(x){return '<option value="'+esc(x)+'">'}).join("")})}
 function fillSt(){var b=$("f_bu").value,s=$("f_st");s.innerHTML='<option value="">اختر</option>'+opt(b?SITES[b]:[]);s.disabled=!b;var n=$("f_sn");n.value="";n.disabled=true;dl();snHint()}
@@ -191,7 +201,8 @@ $("rows").innerHTML=trs(fs,L.slice(s,s+stL.s),s,1);
 pager($("pg1"),stL,drawList);$("cnt").textContent=L.length;$("empty").style.display=L.length?"none":"block";upSend();
 Object.keys(PROF).forEach(function(k){var e=$("pc_"+k);if(e)e.textContent=LISTS[k].length+" في القائمة"});dl()}
 $("add").onclick=function(){var fs=ALLF(),a={},miss=[];
-fs.forEach(function(f){var e=$("f_"+f.k),v=f.t=="sid"?sid(e.value):e.value.trim();a[f.k]=v;if((req(f)&&!v)||(f.t=="email"&&v&&!okEm(v)))miss.push(f.k)});
+fs.forEach(function(f){var e=$("f_"+f.k);a[f.k]=f.t=="sid"?sid(e.value):e.value.trim()});normRec(a,CUR);
+fs.forEach(function(f){var v=a[f.k];if((req(f)&&!v)||(f.t=="email"&&v&&!okEm(v)))miss.push(f.k)});
 flag(miss);if(miss.length){$("err").textContent="أكمل الحقول الإلزامية المعلّمة بعلامة * وتأكد من صحة البريد الإلكتروني";return}
 $("err").textContent="";LIST().push(a);stL.p=1e9;
 P().rw.forEach(function(f){var e=$("f_"+f.k);e.value=f.t=="sid"?(f.r?"":"0001"):""});geo();$("lb").hidden=false;$("done").hidden=true;drawList()};
@@ -205,7 +216,7 @@ if(keys.some(function(k){return k&&(pass==0?h===k:(h.indexOf(k)>-1||(h.length>3&
 return res}
 function rowObj(r,ix){var a={};ALLF().forEach(function(f){var v=ix[f.k]>-1?String(r[ix[f.k]]).trim():"";if(!v&&isSh(f))v=pageV(f);if(f.t=="sid"&&v)v=sid(v);a[f.k]=v});
 if(ix.la>-1&&!a.gp){var la=String(r[ix.la]).trim(),lo=ix.lo>-1?String(r[ix.lo]).trim():"";if(la&&lo)a.gp=la+", "+lo}
-return ALLF().every(function(f){return !req(f)||a[f.k]})?a:null}
+normRec(a,CUR);return ALLF().every(function(f){return !req(f)||a[f.k]})?a:null}
 
 /* ===== التصنيف التلقائي ===== */
 var SIG={asset:["at","an","sr","wy","bu","st"],device:["dty","dsr","sty","sim","ex","stt","ss"]};
@@ -216,6 +227,7 @@ var g=guessAll(),ix={};TG.forEach(function(f){ix[f.k]=g[f.k]===undefined?-1:g[f.
 function recP(r,ix,pk){var fs=PF(pk),a={},miss=[],why="";
 fs.forEach(function(f){var c=ix[f.k],v=c>-1?String(r[c]).trim():"";if(!v&&pk==CUR&&PROF[pk].sh.indexOf(f)>-1)v=pageV(f);if(f.t=="sid"&&v)v=sid(v);a[f.k]=v});
 if(ix.la>-1&&!a.gp){var la=String(r[ix.la]).trim(),lo=ix.lo>-1?String(r[ix.lo]).trim():"";if(la&&lo)a.gp=la+", "+lo}
+normRec(a,pk);
 if(pk=="asset"){var r2=fixAsset(a);why=r2}
 fs.forEach(function(f){if(f.t!="sel"||!a[f.k])return;var c=canon(a[f.k],f.o);if(c)a[f.k]=c});
 fs.forEach(function(f){var need=f.r||(f.t=="dp"&&DEPTS.length>0);if(need&&!a[f.k])miss.push(f.l)});
@@ -250,6 +262,30 @@ else if(t&&!a.bu){a.st=t;bu=t.split(" ")[0]}
 if(bu)a.bu=bu;return ""}
 var STK=null;function stKinds(){if(!STK){STK={};Object.keys(SITES).forEach(function(b){SITES[b].forEach(function(x){STK[nz(x)]=1;STK[nz(x.slice(b.length))]=1})});["DMZ","SIV"].forEach(function(x){STK[nz(x)]=1})}return STK}
 function filled(r,ix,pk){return PF(pk).filter(function(f){var c=ix[f.k];return c>-1&&String(r[c]).trim()!==""}).length}
+function setSeg(k,v){var h=$("f_"+k);if(!h)return;h.value=v||"";h.classList.remove("bad");
+Array.prototype.forEach.call(document.querySelectorAll('.sg[data-sg="'+k+'"]'),function(b){var on=b.getAttribute("data-val")===v;b.classList.toggle("on",on);b.setAttribute("aria-checked",on?"true":"false")})}
+/* ===== تنظيف القيم: التاريخ، الرقمين، المنطقة، الحالة ===== */
+function p2(n){return("0"+n).slice(-2)}
+function ymd(y,m,d){y=+y;m=+m;d=+d;if(y<100)y+=2000;if(!(m>=1&&m<=12&&d>=1&&d<=31))return null;return y+"-"+p2(m)+"-"+p2(d)}
+function normDate(v){v=String(v==null?"":v).trim().replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632});if(!v||v==NA)return v;var m;
+if(/^\d{4}$/.test(v))return v+"-01-01";
+if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})$/))return ymd(m[1],m[2],1)||v;
+if(m=v.match(/^(\d{1,2})[\/\-.](\d{4})$/))return ymd(m[2],m[1],1)||v;
+if(m=v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/))return ymd(m[1],m[2],m[3])||v;
+if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var a1=+m[1],a2=+m[2];return(a2>12?ymd(m[3],a1,a2):ymd(m[3],a2,a1))||v}
+if(/^\d{5}(\.\d+)?$/.test(v)){var n=+v;if(n>20000&&n<80000)return new Date(Math.round((n-25569)*864e5)).toISOString().slice(0,10)}
+var t=Date.parse(v);if(!isNaN(t)){var d=new Date(t);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
+return v}
+function normArea(v){var m=String(v).trim().match(/^(?:area|منطقة|المنطقة)?\s*[-_ ]?\s*([1-7])$/i);return m?"Area "+m[1]:v}
+function normSS(v){var n=nz(v);if(/^issues?$|^مشكل/.test(n))return "Issues";if(n=="hold"||n=="onhold"||n=="معلق")return "Hold";if(n=="ready"||n=="جاهز")return "Ready";return v}
+function normRec(a,pk){PF(pk).forEach(function(f){var v=a[f.k];if(!v)return;
+if(f.t=="date")a[f.k]=normDate(v);
+if(f.k=="ar")a[f.k]=normArea(v);
+if(f.k=="ss")a[f.k]=normSS(v)});
+PF(pk).forEach(function(g){if(!g.x||!a[g.x]||String(a[g.x]).indexOf("/")<0)return;var parts=String(a[g.x]).split("/").map(function(x){return x.trim()}).filter(Boolean);
+a[g.x]=parts[0]||"";if(parts.length>1&&!a[g.k])a[g.k]=parts.slice(1).join(" / ")});
+return a}
+function vals(k){var o={};LISTS.device.concat(DATA&&DATA.device||[]).forEach(function(x){var v=x[k];if(v&&v!=NA)o[v]=1});return Object.keys(o).sort()}
 function auto(){return $("auto").checked}
 function drawOther(){var n=OTHER.length,m=50;$("ob").hidden=!n;$("ocnt").textContent=n;
 $("orows").innerHTML=OTHER.slice(0,m).map(function(o,i){var sm=o.h.map(function(h,j){return o.r[j]?h+": "+o.r[j]:""}).filter(Boolean).slice(0,4).join(" | ");return "<tr><td>"+(i+1)+"</td><td>"+esc(o.why)+"</td><td>"+esc(o.sug)+"</td><td>"+esc(sm)+"</td></tr>"}).join("");
@@ -341,6 +377,7 @@ $("dh").innerHTML="<tr><th>#</th>"+fs.map(function(f){return "<th>"+f.l+"</th>"}
 DS.n=rows.length;cl(DS);var s=DS.p*DS.s;$("db").innerHTML=trs(fs,rows.slice(s,s+DS.s),s,0);pager($("pg2"),DS,drawDash)}
 function tab(v){["v1","v2"].forEach(function(x){$(x).hidden=x!=v});Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){b.classList.toggle("on",b.getAttribute("data-v")==v)});if(v=="v2")loadData(drawDash)}
 document.addEventListener("click",function(e){var t=e.target.closest?e.target.closest("button"):null;if(!t)return;
+var sk=t.getAttribute("data-sg");if(sk){setSeg(sk,t.getAttribute("data-val"));rep();return}
 var xk=t.getAttribute("data-x");if(xk){var w=$("w_"+xk);w.hidden=!w.hidden;if(w.hidden)$("f_"+xk).value="";t.textContent=w.hidden?t.getAttribute("data-t"):"− إلغاء";if(!w.hidden)$("f_"+xk).focus();return}
 var s=t.getAttribute("data-s");if(s){var i=t.parentNode.querySelector("input");i.value=sid(Math.max(0,(parseInt(i.value,10)||0)+ +s));return}
 if(t.className=="del"){LIST().splice(+t.getAttribute("data-i"),1);drawList();return}
