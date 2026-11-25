@@ -82,6 +82,7 @@ header{flex-wrap:wrap}
 .tb{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.tb input{flex:1;min-width:180px}.tb select{width:auto;min-width:160px}
 
 .auto{display:flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}.auto input{width:auto}
+.na{color:#d93025;font-weight:700}
 .lk{background:none;color:var(--blue);padding:4px 0;font-weight:500;font-size:13px;text-decoration:underline;margin-top:4px}</style>
 </head>
 <body>
@@ -129,7 +130,7 @@ device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدف�
 sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","text"),F("ds","الحي (District)","District","text"),F("gp","إحداثيات الموقع","Location coordinates","coord"),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","sel",1,["Ready","Issue","Issues","Hold"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel"),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
 rw:[F("dty","نوع الجهاز","Device Type","text",1),F("dsr","الرقم التسلسلي للجهاز","Device Serial Number","text",1),F("sty","نوع الحساس","Sensor type","text"),F("sim","الرقم التسلسلي للشريحة","Serial SIM","text"),F("ex","تاريخ انتهاء الجهاز","Equipment Expiry Date","date")]}};
 var AL={bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
-var XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
+var NA="*N/A*",XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
 var MAPH='<div class="gb"><div class="map" id="map"><span>الخريطة تظهر بعد إدخال الإحداثيات</span></div><div><p class="hint" id="gh"></p><a id="gl" href="#" target="_blank" rel="noopener" hidden>فتح في خرائط Google</a></div></div>';
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -182,7 +183,7 @@ box.style.display=st.n?"flex":"none";
 box.innerHTML='<button type="button" data-g="0"'+(st.p==0?" disabled":"")+'>الأولى</button><button type="button" data-g="'+(st.p-1)+'"'+(st.p==0?" disabled":"")+'>السابق</button><select class="pgs">'+o+'</select><button type="button" data-g="'+(st.p+1)+'"'+(st.p>=tp-1?" disabled":"")+'>التالي</button><button type="button" data-g="'+(tp-1)+'"'+(st.p>=tp-1?" disabled":"")+'>الأخيرة</button><span class="hint">عرض '+(st.n?a+1:0)+'–'+Math.min(st.n,a+st.s)+' من '+st.n+'</span><label class="psz">صفوف بالصفحة <select class="pz">'+[20,25,30,50].map(function(x){return '<option'+(x==st.s?" selected":"")+'>'+x+'</option>'}).join("")+'</select></label>';
 box.onclick=function(e){var g=e.target.getAttribute("data-g");if(g!==null&&!e.target.disabled){st.p=+g;cb()}};
 box.onchange=function(e){if(e.target.className=="pz"){st.s=+e.target.value;st.p=0}else st.p=+e.target.value;cb()}}
-function trs(fs,rows,s,del){return rows.map(function(a,k){var i=s+k;return "<tr><td>"+(i+1)+"</td>"+fs.map(function(f){var v=a[f.k]||"",g=isC(f)?parseGeo(v):null;return "<td>"+(g?"<a href='https://www.google.com/maps?q="+g[0]+","+g[1]+"' target='_blank' rel='noopener'>"+esc(v)+"</a>":esc(v))+"</td>"}).join("")+(del?'<td><button type="button" class="del" data-i="'+i+'">حذف</button></td>':"")+"</tr>"}).join("")}
+function trs(fs,rows,s,del){return rows.map(function(a,k){var i=s+k;return "<tr><td>"+(i+1)+"</td>"+fs.map(function(f){var v=a[f.k]||"",g=isC(f)?parseGeo(v):null;return "<td>"+(!v?'<span class="na">'+NA+'</span>':g?"<a href='https://www.google.com/maps?q="+g[0]+","+g[1]+"' target='_blank' rel='noopener'>"+esc(v)+"</a>":esc(v))+"</td>"}).join("")+(del?'<td><button type="button" class="del" data-i="'+i+'">حذف</button></td>':"")+"</tr>"}).join("")}
 function drawList(){var L=LIST(),fs=ALLF();stL.n=L.length;cl(stL);var s=stL.p*stL.s;
 $("lh").innerHTML="<tr><th>#</th>"+fs.map(function(f){return "<th>"+f.l+"</th>"}).join("")+"<th></th></tr>";
 $("rows").innerHTML=trs(fs,L.slice(s,s+stL.s),s,1);
@@ -231,7 +232,7 @@ XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,
 if(!s.asset&&!s.device&&!A.ok&&!D.ok){out.other.push({h:hh,r:r.map(String),why:"لا يطابق قسم الأصول ولا الأجهزة",sug:"",d:d,f:fn});return}
 pk=s.asset>s.device?"asset":s.device>s.asset?"device":(A.ok&&!D.ok?"asset":D.ok&&!A.ok?"device":CUR);alt=pk=="asset"?"device":"asset";
 var R=pk=="asset"?A:D,RA=pk=="asset"?D:A;
-if(R.ok){out[pk].push(R.a);return}
+if(R.ok||(!R.why&&s[pk]>0)){out[pk].push(R.a);return}
 if(RA.ok&&s[alt]>0){out[alt].push(RA.a);return}
 out.other.push({h:hh,r:r.map(String),why:R.why||("ناقص: "+R.miss.join("، ")),sug:PROF[pk].t,d:d,f:fn})});
 return out}
@@ -285,8 +286,8 @@ xm("تمت إضافة "+ad+" سجل للقائمة"+(sk?"، و"+sk+" سجل نا
 $("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList()};
 function finish(n,pv){LISTS.asset=[];LISTS.device=[];OTHER=[];drawOther();stL.p=0;$("lb").hidden=true;$("done").hidden=false;$("dn").textContent="تم إرسال "+n+" سجل بنجاح"+(pv?" (معاينة: لم تُرسل البيانات فعليًا)":"");$("msg").textContent="";drawList()}
 $("send").onclick=function(){var jobs=[],n=total();
-Object.keys(PROF).forEach(function(k){var L=LISTS[k];if(!L.length)return;var fs=PF(k);jobs.push({k:k,sheet:PROF[k].sheet,hd:fs.map(function(f){return f.h}),items:L.slice(),rows:L.map(function(a){return fs.map(function(f){return a[f.k]||""})})})});
-var g={};OTHER.forEach(function(o){var key=JSON.stringify(o.h);if(!g[key])g[key]={k:"other",sheet:OSHEET,hd:["Reason","Nearest section","Upload date","Source file"].concat(o.h),items:[],rows:[]};g[key].items.push(o);g[key].rows.push([o.why,o.sug,o.d,o.f].concat(o.r))});
+Object.keys(PROF).forEach(function(k){var L=LISTS[k];if(!L.length)return;var fs=PF(k);jobs.push({k:k,sheet:PROF[k].sheet,hd:fs.map(function(f){return f.h}),items:L.slice(),rows:L.map(function(a){return fs.map(function(f){return a[f.k]||NA})})})});
+var g={};OTHER.forEach(function(o){var key=JSON.stringify(o.h);if(!g[key])g[key]={k:"other",sheet:OSHEET,hd:["Reason","Nearest section","Upload date","Source file"].concat(o.h),items:[],rows:[]};g[key].items.push(o);g[key].rows.push([o.why,o.sug,o.d,o.f].concat(o.r.map(function(v){return String(v).trim()?v:NA})))});
 Object.keys(g).forEach(function(k){jobs.push(g[k])});
 if(PREVIEW){finish(n,1);return}
 if(SC.indexOf("PASTE")===0){$("msg").textContent="ضع رابط Google Apps Script في المتغير SC أولًا";$("msg").style.color="var(--danger)";return}
@@ -306,7 +307,7 @@ var ty=["مضخة","عداد","صمام","لوحة تحكم","خزان"],A=[],D=
 for(i=0;i<160;i++){x=nm[R(nm.length)];A.push({dp:"",bu:x[0].split(" ")[0],st:x[0],sn:x[1],at:ty[R(5)],an:"أصل "+(i+1),si:String(1000+R(9000)),sr:"SN"+(100000+R(900000)),dt:dt(-2000,-100),wy:R(3)?"":dt(-120,900),mc:"",gp:gp(),nt:""})}
 for(i=0;i<110;i++){x=nm[R(nm.length)];D.push({sn:x[1],si:String(2000+R(8000)),ar:["الرياض","الخرج","الدرعية"][R(3)],ds:"",gp:gp(),stt:["Flow","FLM","Pressure","PRV","Valve"][R(5)],ss:["Ready","Ready","Ready","Issues","Hold"][R(5)],em:"support@example.com",hl:"920000000",dty:"Device "+(i+1),dsr:"D"+(100000+R(900000)),sty:"",sim:"SIM"+(100000+R(900000)),ex:dt(-100,800)})}
 return{asset:A,device:D,demo:1}}
-function conv(j){var o={};Object.keys(PROF).forEach(function(k){var p=PROF[k],hm={};p.sh.concat(p.rw).forEach(function(f){hm[f.h]=f.k});o[k]=(j[p.sheet]||[]).map(function(x){var r={};for(var h in x)if(hm[h])r[hm[h]]=String(x[h]);return r})});return o}
+function conv(j){var o={};Object.keys(PROF).forEach(function(k){var p=PROF[k],hm={};p.sh.concat(p.rw).forEach(function(f){hm[f.h]=f.k});o[k]=(j[p.sheet]||[]).map(function(x){var r={};for(var h in x)if(hm[h])r[hm[h]]=String(x[h])==NA?"":String(x[h]);return r})});return o}
 function loadData(cb){if(DATA)return cb();
 if(PREVIEW||SC.indexOf("PASTE")===0){DATA=sample();return cb()}
 fetch(SC+"?action=list").then(function(r){return r.json()}).then(function(j){DATA=conv(j);cb()}).catch(function(){DATA=sample();DATA.err=1;cb()})}
