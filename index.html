@@ -135,7 +135,7 @@ device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدف�
 sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","combo"),F("ds","الحي (District)","District","combo"),F("gp","إحداثيات الموقع","Location coordinates","coord",1),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","seg",1,["Issues","Hold","Ready"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel",1),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
 rw:[F("dty","نوع الجهاز","Device Type","text",1),F("dsr","الرقم التسلسلي للجهاز","Device Serial Number","text",1),F("sty","نوع الحساس","Sensor type","text"),F("sim","الرقم التسلسلي للشريحة","Serial SIM","text"),F("ex","تاريخ انتهاء الجهاز","Equipment Expiry Date","date")]}};
 var AL={mc2:["additionalmanufacturer","manufacturercontact2"],mc:["manufacturer"],bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
-var SEGC={Issues:"#D94343",Hold:"#91A9B8",Ready:"#27965C"},AREAS=["Area 1","Area 2","Area 3","Area 4","Area 5","Area 6","Area 7"],NA="*N/A*",XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
+var SEGC={Issues:"#D94343",Hold:"#91A9B8",Ready:"#27965C"},AREAS=["Area-1","Area-2","Area-3","Area-4","Area-5","Area-6","Area-7"],NA="*N/A*",XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
 var MAPH='<div class="gb"><div class="map" id="map"><span>الخريطة تظهر بعد إدخال الإحداثيات</span></div><div><p class="hint" id="gh"></p><a id="gl" href="#" target="_blank" rel="noopener" hidden>فتح في خرائط Google</a></div></div>';
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -273,7 +273,7 @@ if(m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/)){var a1=+m[1],a2=+m[
 if(/^\d{5}(\.\d+)?$/.test(v)){var n=+v;if(n>20000&&n<80000)return new Date(Math.round((n-25569)*864e5)).toISOString().slice(0,10)}
 var t=Date.parse(v);if(!isNaN(t)){var d=new Date(t);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
 return v}
-function normArea(v){var m=String(v).trim().match(/^(?:area|منطقة|المنطقة)?\s*[-_ ]?\s*([1-7])$/i);return m?"Area "+m[1]:v}
+function normArea(v){var m=String(v).trim().match(/^(?:area|منطقة|المنطقة)?\s*[-_ ]?\s*([1-7])$/i);return m?"Area-"+m[1]:v}
 function normSS(v){var n=nz(v);if(/^issues?$|^مشكل/.test(n))return "Issues";if(n=="hold"||n=="onhold"||n=="معلق")return "Hold";if(n=="ready"||n=="جاهز")return "Ready";return v}
 function normRec(a,pk){PF(pk).forEach(function(f){var v=a[f.k];if(!v)return;
 if(f.t=="date")a[f.k]=normDate(v);
