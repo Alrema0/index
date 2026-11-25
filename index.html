@@ -81,7 +81,6 @@ header{flex-wrap:wrap}
 .ex{display:flex;align-items:flex-end;gap:4px;height:110px}.ex div{flex:1;text-align:center;font-size:10px;color:var(--mute);display:flex;flex-direction:column;justify-content:flex-end;height:100%}.ex i{display:block;background:linear-gradient(180deg,var(--blue),var(--teal));border-radius:4px 4px 0 0;min-height:2px}
 .tb{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.tb input{flex:1;min-width:180px}.tb select{width:auto;min-width:160px}
 
-.auto{display:flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}.auto input{width:auto}
 .na{color:#d93025;font-weight:700}
 .seg{display:flex;width:100%;background:#fff;border:1px solid #dde2e7;border-radius:10px;overflow:hidden}
 .seg .sg{flex:1 1 0;min-width:0;margin:0;background:#fff;color:#4a5560;border:0;border-radius:0;padding:11px 6px;font-size:13px;font-weight:500;letter-spacing:.06em;transition:background-color .22s ease,color .22s ease}
@@ -100,9 +99,8 @@ input.bad+.seg{border-color:var(--danger)}
 <section><h2>البيانات المشتركة</h2><div id="gs"></div><div id="ms"></div></section>
 <section><h2 id="rt">بيانات الأصل</h2><div id="gr"></div><div id="mr"></div><button class="add" id="add" type="button">إضافة للقائمة</button><p class="hint" id="err" role="alert"></p></section>
 <section><h2>استيراد من Excel</h2>
-<label class="auto"><input type="checkbox" id="auto" checked> تصنيف تلقائي: كل صف يروح لقسمه (أصل / جهاز)، وغير المدرج يروح لشيت منفصل</label>
 <div class="imp"><input type="file" id="xf" accept=".xlsx,.xls,.csv"><span class="hint" id="xh"></span></div>
-<div id="mp" hidden><div class="tw" id="mg"></div><button class="add" id="xadd" type="button">إضافة الصفوف للقوائم</button></div>
+<div id="mp" hidden><div class="tw" id="mg"></div><button class="add" id="xadd" type="button">إضافة الصفوف السليمة للقائمة</button></div>
 </section>
 <section id="lb"><h2>القائمة المضافة <span class="count" id="cnt">0</span></h2>
 <div class="tw"><table><thead id="lh"></thead><tbody id="rows"></tbody></table></div>
@@ -116,7 +114,6 @@ input.bad+.seg{border-color:var(--danger)}
 <section id="done" class="done" hidden><div class="ck">✓</div><h2 id="dn"></h2><p class="hint">تم حفظ البيانات في Google Sheet</p><button class="add" id="again" type="button">تسجيل جديد</button></section>
 <button class="send" id="send" type="button" disabled>إرسال الكل</button>
 <div id="msg" role="status"></div>
-<p class="hint" id="ver" style="text-align:center;opacity:.6">إصدار الصفحة: 2026-11-25 (6)</p>
 </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -159,7 +156,7 @@ else if(t=="bu")x='<select id="'+id+'"><option value="">اختر</option>'+opt(O
 else if(t=="st")x='<select id="'+id+'" disabled><option value="">اختر</option></select>';
 else if(t=="seg")x='<input type="hidden" id="'+id+'"><div class="seg" dir="ltr" role="radiogroup" aria-label="'+esc(f.l)+'">'+f.o.map(function(o){return '<button type="button" class="sg" role="radio" aria-checked="false" data-sg="'+f.k+'" data-val="'+esc(o)+'" style="--c:'+(SEGC[o]||"#27965C")+'">'+esc(o.toUpperCase())+'</button>'}).join("")+'</div>';
 else if(t=="sel")x='<select id="'+id+'"><option value="">اختر</option>'+opt(f.o)+'</select>';
-else if(t=="sn"||t=="combo")x='<input id="'+id+'" list="dl_'+f.k+'"'+(t=="sn"?' disabled':'')+' placeholder="'+(f.k=="ar"||f.k=="ds"?"اختر من القائمة أو اكتب":"ابحث أو اكتب اسمًا جديدًا")+'"><datalist id="dl_'+f.k+'"></datalist>';
+else if(t=="sn"||t=="combo")x='<input id="'+id+'" list="dl_'+f.k+'"'+(t=="sn"?' disabled':'')+' placeholder="ابحث أو اكتب اسمًا جديدًا"><datalist id="dl_'+f.k+'"></datalist>';
 else if(t=="sid")x='<div class="stepper"><button type="button" data-s="-1">&minus;</button><input id="'+id+'" data-d="1" inputmode="numeric" maxlength="9" value="'+(f.r?"":"0001")+'" placeholder="0001" dir="ltr"><button type="button" data-s="1">+</button></div>';
 else if(t=="area")x='<textarea id="'+id+'" rows="2"></textarea>';
 else x='<input id="'+id+'"'+(t=="tel"?' data-d="1" inputmode="numeric" dir="ltr"':t=="date"?' type="date"':t=="email"?' dir="ltr" placeholder="a@x.com; b@x.com"':t=="coord"?' dir="ltr" placeholder="24.7136, 46.6753"':'')+'>';
@@ -286,14 +283,13 @@ PF(pk).forEach(function(g){if(!g.x||!a[g.x]||String(a[g.x]).indexOf("/")<0)retur
 a[g.x]=parts[0]||"";if(parts.length>1&&!a[g.k])a[g.k]=parts.slice(1).join(" / ")});
 return a}
 function vals(k){var o={};LISTS.device.concat(DATA&&DATA.device||[]).forEach(function(x){var v=x[k];if(v&&v!=NA)o[v]=1});return Object.keys(o).sort()}
-function auto(){return $("auto").checked}
+function auto(){return true}
 function drawOther(){var n=OTHER.length,m=50;$("ob").hidden=!n;$("ocnt").textContent=n;
 $("orows").innerHTML=OTHER.slice(0,m).map(function(o,i){var sm=o.h.map(function(h,j){return o.r[j]?h+": "+o.r[j]:""}).filter(Boolean).slice(0,4).join(" | ");return "<tr><td>"+(i+1)+"</td><td>"+esc(o.why)+"</td><td>"+esc(o.sug)+"</td><td>"+esc(sm)+"</td></tr>"}).join("");
 $("omore").textContent=n>m?"معروض أول "+m+" من "+n:"";upSend()}
 function total(){return LISTS.asset.length+LISTS.device.length+OTHER.length}
 function upSend(){$("send").disabled=!total()}
 $("oclr").onclick=function(){OTHER=[];drawOther()};
-$("auto").onchange=function(){rep()};
 function bmap(){TG=ALLF().slice();if(ALLF().some(isC))TG.push({k:"la",l:"Latitude",h:"Latitude"},{k:"lo",l:"Longitude",h:"Longitude"});
 var g=guessAll();
 $("mg").innerHTML='<table class="mt"><thead><tr><th>الحقل</th><th>عمود Excel (اختر العنوان)</th><th>الحالة</th></tr></thead><tbody>'+TG.map(function(f){return '<tr><td>'+f.l+(req(f)?' <b class="rq">*</b>':'')+'</td><td><select id="m_'+f.k+'"><option value="-1">— تجاهل —</option>'+XHEAD.map(function(x,i){return '<option value="'+i+'"'+(g[f.k]===i?" selected":"")+'>'+esc(x||("عمود "+(i+1)))+'</option>'}).join("")+'</select></td><td id="n_'+f.k+'"></td></tr>'}).join("")+'</tbody></table><p id="sm" class="hint"></p>';
