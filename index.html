@@ -109,6 +109,7 @@ header{flex-wrap:wrap}
 <section id="done" class="done" hidden><div class="ck">✓</div><h2 id="dn"></h2><p class="hint">تم حفظ البيانات في Google Sheet</p><button class="add" id="again" type="button">تسجيل جديد</button></section>
 <button class="send" id="send" type="button" disabled>إرسال الكل</button>
 <div id="msg" role="status"></div>
+<p class="hint" id="ver" style="text-align:center;opacity:.6">إصدار الصفحة: 2026-11-25 (5)</p>
 </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -229,7 +230,7 @@ function xhead(){var seen={};return XHEAD.map(function(h,i){h=String(h).trim()||
 function classify(){var ixA=mapFor("asset"),ixD=mapFor("device"),out={asset:[],device:[],other:[]},hh=xhead(),d=new Date().toISOString().slice(0,10),fn=XFN;
 XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,ixD,"device"),fA=filled(r,ixA,"asset"),fD=filled(r,ixD,"device");
 var rst=ixA.st>-1?nz(r[ixA.st]):"";if(rst&&stKinds()[rst])s.asset+=2;
-var pk=s.asset>s.device?"asset":s.device>s.asset?"device":fA>fD?"asset":fD>fA?"device":null;
+var pk=s.asset>s.device?"asset":s.device>s.asset?"device":fA>fD?"asset":fD>fA?"device":CUR;
 if(!pk||(pk=="asset"?fA:fD)<2){out.other.push({h:hh,r:r.map(String),why:"ما انطبق على قسم الأصول ولا الأجهزة",sug:pk?PROF[pk].t:"",d:d,f:fn});return}
 out[pk].push((pk=="asset"?A:D).a)});
 return out}
