@@ -81,6 +81,7 @@ header{flex-wrap:wrap}
 .ex{display:flex;align-items:flex-end;gap:4px;height:110px}.ex div{flex:1;text-align:center;font-size:10px;color:var(--mute);display:flex;flex-direction:column;justify-content:flex-end;height:100%}.ex i{display:block;background:linear-gradient(180deg,var(--blue),var(--teal));border-radius:4px 4px 0 0;min-height:2px}
 .tb{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.tb input{flex:1;min-width:180px}.tb select{width:auto;min-width:160px}
 
+.auto{display:flex;gap:8px;align-items:center;font-size:14px;margin:0 0 10px;cursor:pointer}.auto input{width:auto}
 .lk{background:none;color:var(--blue);padding:4px 0;font-weight:500;font-size:13px;text-decoration:underline;margin-top:4px}</style>
 </head>
 <body>
@@ -91,14 +92,19 @@ header{flex-wrap:wrap}
 <section><h2>البيانات المشتركة</h2><div id="gs"></div><div id="ms"></div></section>
 <section><h2 id="rt">بيانات الأصل</h2><div id="gr"></div><div id="mr"></div><button class="add" id="add" type="button">إضافة للقائمة</button><p class="hint" id="err" role="alert"></p></section>
 <section><h2>استيراد من Excel</h2>
+<label class="auto"><input type="checkbox" id="auto" checked> تصنيف تلقائي: كل صف يروح لقسمه (أصل / جهاز)، وغير المدرج يروح لشيت منفصل</label>
 <div class="imp"><input type="file" id="xf" accept=".xlsx,.xls,.csv"><span class="hint" id="xh"></span></div>
-<div id="mp" hidden><div class="tw" id="mg"></div><button class="add" id="xadd" type="button">إضافة الصفوف السليمة للقائمة</button></div>
+<div id="mp" hidden><div class="tw" id="mg"></div><button class="add" id="xadd" type="button">إضافة الصفوف للقوائم</button></div>
 </section>
 <section id="lb"><h2>القائمة المضافة <span class="count" id="cnt">0</span></h2>
 <div class="tw"><table><thead id="lh"></thead><tbody id="rows"></tbody></table></div>
 <div class="pager" id="pg1" style="display:none"></div>
 <div class="empty" id="empty">القائمة فارغة، أضف أول سجل من الأعلى</div>
 <p class="hint">راجع القائمة واحذف أي صف خاطئ قبل الإرسال</p></section>
+<section id="ob" hidden><h2>غير مصنّف / غير مدرج <span class="count" id="ocnt">0</span></h2>
+<p class="hint">هذي الصفوف ما انطبقت على قسم الأصول ولا الأجهزة، أو فيها بيانات غير مدرجة. بتنرسل لشيت منفصل اسمه <b>Unclassified</b></p>
+<div class="tw"><table><thead><tr><th>#</th><th>السبب</th><th>القسم الأقرب</th><th>البيانات</th></tr></thead><tbody id="orows"></tbody></table></div>
+<p class="hint" id="omore"></p><button type="button" class="lk" id="oclr">مسح قائمة غير المصنّف</button></section>
 <section id="done" class="done" hidden><div class="ck">✓</div><h2 id="dn"></h2><p class="hint">تم حفظ البيانات في Google Sheet</p><button class="add" id="again" type="button">تسجيل جديد</button></section>
 <button class="send" id="send" type="button" disabled>إرسال الكل</button>
 <div id="msg" role="status"></div>
@@ -123,7 +129,7 @@ device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدف�
 sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","text"),F("ds","الحي (District)","District","text"),F("gp","إحداثيات الموقع","Location coordinates","coord"),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","sel",1,["Ready","Issue","Issues","Hold"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel"),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
 rw:[F("dty","نوع الجهاز","Device Type","text",1),F("dsr","الرقم التسلسلي للجهاز","Device Serial Number","text",1),F("sty","نوع الحساس","Sensor type","text"),F("sim","الرقم التسلسلي للشريحة","Serial SIM","text"),F("ex","تاريخ انتهاء الجهاز","Equipment Expiry Date","date")]}};
 var AL={bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
-var CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
+var OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
 var MAPH='<div class="gb"><div class="map" id="map"><span>الخريطة تظهر بعد إدخال الإحداثيات</span></div><div><p class="hint" id="gh"></p><a id="gl" href="#" target="_blank" rel="noopener" hidden>فتح في خرائط Google</a></div></div>';
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -180,7 +186,7 @@ function trs(fs,rows,s,del){return rows.map(function(a,k){var i=s+k;return "<tr>
 function drawList(){var L=LIST(),fs=ALLF();stL.n=L.length;cl(stL);var s=stL.p*stL.s;
 $("lh").innerHTML="<tr><th>#</th>"+fs.map(function(f){return "<th>"+f.l+"</th>"}).join("")+"<th></th></tr>";
 $("rows").innerHTML=trs(fs,L.slice(s,s+stL.s),s,1);
-pager($("pg1"),stL,drawList);$("cnt").textContent=L.length;$("empty").style.display=L.length?"none":"block";$("send").disabled=!L.length;
+pager($("pg1"),stL,drawList);$("cnt").textContent=L.length;$("empty").style.display=L.length?"none":"block";upSend();
 Object.keys(PROF).forEach(function(k){var e=$("pc_"+k);if(e)e.textContent=LISTS[k].length+" في القائمة"});dl()}
 $("add").onclick=function(){var fs=ALLF(),a={},miss=[];
 fs.forEach(function(f){var e=$("f_"+f.k),v=f.t=="sid"?sid(e.value):e.value.trim();a[f.k]=v;if((req(f)&&!v)||(f.t=="email"&&v&&!okEm(v)))miss.push(f.k)});
@@ -198,6 +204,45 @@ return res}
 function rowObj(r,ix){var a={};ALLF().forEach(function(f){var v=ix[f.k]>-1?String(r[ix[f.k]]).trim():"";if(!v&&isSh(f))v=pageV(f);if(f.t=="sid"&&v)v=sid(v);a[f.k]=v});
 if(ix.la>-1&&!a.gp){var la=String(r[ix.la]).trim(),lo=ix.lo>-1?String(r[ix.lo]).trim():"";if(la&&lo)a.gp=la+", "+lo}
 return ALLF().every(function(f){return !req(f)||a[f.k]})?a:null}
+
+/* ===== التصنيف التلقائي ===== */
+var SIG={asset:["at","an","sr","wy","bu","st"],device:["dty","dsr","sty","sim","ex","stt","ss"]};
+function PF(pk){return PROF[pk].sh.concat(PROF[pk].rw)}
+function canon(v,arr){var n=nz(v);for(var i=0;i<arr.length;i++)if(nz(arr[i])===n)return arr[i];return null}
+function mapFor(pk){if(pk==CUR&&!$("mp").hidden)return MV();var sc=CUR,st=TG;CUR=pk;TG=ALLF().slice();if(ALLF().some(isC))TG.push({k:"la",l:"Latitude",h:"Latitude"},{k:"lo",l:"Longitude",h:"Longitude"});
+var g=guessAll(),ix={};TG.forEach(function(f){ix[f.k]=g[f.k]===undefined?-1:g[f.k]});TG=st;CUR=sc;return ix}
+function recP(r,ix,pk){var fs=PF(pk),a={},miss=[],why="";
+fs.forEach(function(f){var c=ix[f.k],v=c>-1?String(r[c]).trim():"";if(!v&&pk==CUR&&PROF[pk].sh.indexOf(f)>-1)v=pageV(f);if(f.t=="sid"&&v)v=sid(v);a[f.k]=v});
+if(ix.la>-1&&!a.gp){var la=String(r[ix.la]).trim(),lo=ix.lo>-1?String(r[ix.lo]).trim():"";if(la&&lo)a.gp=la+", "+lo}
+if(pk=="asset"){if(a.bu){var b=canon(a.bu,Object.keys(SITES));if(!b)why="Business Unit غير مدرج: "+a.bu;else a.bu=b}
+if(!why&&a.st&&a.bu){var s=canon(a.st,SITES[a.bu]||[]);if(!s)why="Site type غير مدرج: "+a.st;else a.st=s}}
+fs.forEach(function(f){if(why||f.t!="sel"||!a[f.k])return;var c=canon(a[f.k],f.o);if(!c)why=f.l+" غير مدرج: "+a[f.k];else a[f.k]=c});
+fs.forEach(function(f){var need=f.r||(f.t=="dp"&&DEPTS.length>0);if(need&&!a[f.k])miss.push(f.l)});
+return{a:a,miss:miss,why:why,ok:!miss.length&&!why}}
+function score(r,ixA,ixD){var used={},s={asset:0,device:0};
+[["asset",ixA],["device",ixD]].forEach(function(p){SIG[p[0]].forEach(function(k){var c=p[1][k];if(c>-1)used[c]=(used[c]||0)+1})});
+[["asset",ixA],["device",ixD]].forEach(function(p){SIG[p[0]].forEach(function(k){var c=p[1][k];if(c>-1&&used[c]==1&&String(r[c]).trim()!=="")s[p[0]]++})});
+var sv=ixD.stt>-1?String(r[ixD.stt]).trim():"";if(sv&&canon(sv,PROF.device.sh.filter(function(f){return f.k=="stt"})[0].o))s.device+=2;
+var stv=ixA.st>-1?String(r[ixA.st]).trim():"";if(stv&&Object.keys(SITES).some(function(b){return canon(stv,SITES[b])}))s.asset+=2;
+return s}
+function xhead(){var seen={};return XHEAD.map(function(h,i){h=String(h).trim()||("عمود "+(i+1));var b=h,n=2;while(seen[h])h=b+" ("+(n++)+")";seen[h]=1;return h})}
+function classify(){var ixA=mapFor("asset"),ixD=mapFor("device"),out={asset:[],device:[],other:[]},hh=xhead(),d=new Date().toISOString().slice(0,10),fn=($("xf").files[0]||{}).name||"";
+XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,ixD,"device"),pk,alt;
+if(!s.asset&&!s.device&&!A.ok&&!D.ok){out.other.push({h:hh,r:r.map(String),why:"لا يطابق قسم الأصول ولا الأجهزة",sug:"",d:d,f:fn});return}
+pk=s.asset>s.device?"asset":s.device>s.asset?"device":(A.ok&&!D.ok?"asset":D.ok&&!A.ok?"device":CUR);alt=pk=="asset"?"device":"asset";
+var R=pk=="asset"?A:D,RA=pk=="asset"?D:A;
+if(R.ok){out[pk].push(R.a);return}
+if(RA.ok&&s[alt]>0){out[alt].push(RA.a);return}
+out.other.push({h:hh,r:r.map(String),why:R.why||("ناقص: "+R.miss.join("، ")),sug:PROF[pk].t,d:d,f:fn})});
+return out}
+function auto(){return $("auto").checked}
+function drawOther(){var n=OTHER.length,m=50;$("ob").hidden=!n;$("ocnt").textContent=n;
+$("orows").innerHTML=OTHER.slice(0,m).map(function(o,i){var sm=o.h.map(function(h,j){return o.r[j]?h+": "+o.r[j]:""}).filter(Boolean).slice(0,4).join(" | ");return "<tr><td>"+(i+1)+"</td><td>"+esc(o.why)+"</td><td>"+esc(o.sug)+"</td><td>"+esc(sm)+"</td></tr>"}).join("");
+$("omore").textContent=n>m?"معروض أول "+m+" من "+n:"";upSend()}
+function total(){return LISTS.asset.length+LISTS.device.length+OTHER.length}
+function upSend(){$("send").disabled=!total()}
+$("oclr").onclick=function(){OTHER=[];drawOther()};
+$("auto").onchange=function(){rep()};
 function bmap(){TG=ALLF().slice();if(ALLF().some(isC))TG.push({k:"la",l:"Latitude",h:"Latitude"},{k:"lo",l:"Longitude",h:"Longitude"});
 var g=guessAll();
 $("mg").innerHTML='<table class="mt"><thead><tr><th>الحقل</th><th>عمود Excel (اختر العنوان)</th><th>الحالة</th></tr></thead><tbody>'+TG.map(function(f){return '<tr><td>'+f.l+(req(f)?' <b class="rq">*</b>':'')+'</td><td><select id="m_'+f.k+'"><option value="-1">— تجاهل —</option>'+XHEAD.map(function(x,i){return '<option value="'+i+'"'+(g[f.k]===i?" selected":"")+'>'+esc(x||("عمود "+(i+1)))+'</option>'}).join("")+'</select></td><td id="n_'+f.k+'"></td></tr>'}).join("")+'</tbody></table><p id="sm" class="hint"></p>';
@@ -210,6 +255,7 @@ else if(sh&&pv)h='من الصفحة: '+esc(pv);
 else if(R)h='<span class="rq">مطلوب — '+(sh?'اربطه بعمود أو عبّه من الصفحة':'اربطه بعمود')+'</span>';
 else h='<span class="gr">غير مربوط (اختياري)</span>';
 c.innerHTML=h});
+if(auto()){var c=classify();$("sm").innerHTML='أصول: <b>'+c.asset.length+'</b> — أجهزة: <b>'+c.device.length+'</b> — غير مصنّف / غير مدرج: <b'+(c.other.length?' class="rq"':'')+'>'+c.other.length+'</b> (بيروح لشيت Unclassified)';setTags();return}
 var ok=0;XROWS.forEach(function(r){if(rowObj(r,ix))ok++});
 $("sm").innerHTML='<b>'+ok+'</b> سجل جاهز للإضافة، و<b'+(N-ok?' class="rq"':'')+'>'+(N-ok)+'</b> سجل ناقص سيُتخطى';setTags()}
 function setTags(){P().sh.forEach(function(f){var l=document.querySelector('label[for="f_'+f.k+'"]');if(!l)return;var s=l.querySelector(".src");if(!s){s=document.createElement("span");l.appendChild(s)}
@@ -222,20 +268,26 @@ var a=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:"yyyy-mm-dd",defval
 a=a.filter(function(x){return x.some(function(c){return String(c).trim()!==""})});
 if(a.length<2){xm("الملف فاضي أو ما فيه صفوف بيانات",1);return}
 XHEAD=a[0].map(String);XROWS=a.slice(1);bmap();xm("تمت قراءة "+XROWS.length+" صف. راجع الأعمدة المقابلة وصحّح العناوين إن لزم ثم اضغط إضافة",0)}catch(err){xm("تعذر قراءة الملف",1)}};r.readAsArrayBuffer(f)};
-$("xadd").onclick=function(){var ix=MV(),need=P().sh.filter(function(f){return req(f)&&ix[f.k]<0&&!pageV(f)});
+$("xadd").onclick=function(){if(auto()){var c=classify();c.asset.forEach(function(a){LISTS.asset.push(a)});c.device.forEach(function(a){LISTS.device.push(a)});c.other.forEach(function(o){OTHER.push(o)});
+xm("أصول: "+c.asset.length+"، أجهزة: "+c.device.length+"، غير مصنّف / غير مدرج: "+c.other.length,c.other.length?1:0);
+$("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList();drawOther();return}
+var ix=MV(),need=P().sh.filter(function(f){return req(f)&&ix[f.k]<0&&!pageV(f)});
 if(need.length){xm("بيانات مشتركة ناقصة: اربطها بعمود من الملف أو عبّها من الصفحة",1);flag(need.map(function(f){return f.k}));return}
-var ad=0,sk=0;XROWS.forEach(function(r){var a=rowObj(r,ix);if(a){LIST().push(a);ad++}else sk++});
-xm("تمت إضافة "+ad+" سجل للقائمة"+(sk?"، وتم تخطي "+sk+" سجل ناقص":""),sk?1:0);
+var ad=0,sk=0,hh=xhead(),dd=new Date().toISOString().slice(0,10),fn=($("xf").files[0]||{}).name||"";XROWS.forEach(function(r){var a=rowObj(r,ix);if(a){LIST().push(a);ad++}else{sk++;OTHER.push({h:hh,r:r.map(String),why:"بيانات ناقصة",sug:P().t,d:dd,f:fn})}});drawOther();
+xm("تمت إضافة "+ad+" سجل للقائمة"+(sk?"، و"+sk+" سجل ناقص راح لقائمة غير المصنّف":""),sk?1:0);
 $("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList()};
-function finish(n,pv){LISTS[CUR]=[];stL.p=0;$("lb").hidden=true;$("done").hidden=false;$("dn").textContent="تم إرسال "+n+" سجل بنجاح"+(pv?" (معاينة: لم تُرسل البيانات فعليًا)":"");$("msg").textContent="";drawList()}
-$("send").onclick=function(){var L=LIST(),p=P(),fs=ALLF(),n=L.length;
+function finish(n,pv){LISTS.asset=[];LISTS.device=[];OTHER=[];drawOther();stL.p=0;$("lb").hidden=true;$("done").hidden=false;$("dn").textContent="تم إرسال "+n+" سجل بنجاح"+(pv?" (معاينة: لم تُرسل البيانات فعليًا)":"");$("msg").textContent="";drawList()}
+$("send").onclick=function(){var jobs=[],n=total();
+Object.keys(PROF).forEach(function(k){var L=LISTS[k];if(!L.length)return;var fs=PF(k);jobs.push({k:k,sheet:PROF[k].sheet,hd:fs.map(function(f){return f.h}),items:L.slice(),rows:L.map(function(a){return fs.map(function(f){return a[f.k]||""})})})});
+var g={};OTHER.forEach(function(o){var key=JSON.stringify(o.h);if(!g[key])g[key]={k:"other",sheet:OSHEET,hd:["Reason","Nearest section","Upload date","Source file"].concat(o.h),items:[],rows:[]};g[key].items.push(o);g[key].rows.push([o.why,o.sug,o.d,o.f].concat(o.r))});
+Object.keys(g).forEach(function(k){jobs.push(g[k])});
 if(PREVIEW){finish(n,1);return}
 if(SC.indexOf("PASTE")===0){$("msg").textContent="ضع رابط Google Apps Script في المتغير SC أولًا";$("msg").style.color="var(--danger)";return}
-this.disabled=true;$("msg").style.color="";
-var hd=fs.map(function(f){return f.h}),rows=L.map(function(a){return fs.map(function(f){return a[f.k]||""})}),i=0,B=300;
-(function next(){if(i>=rows.length){finish(n,0);return}
-$("msg").textContent="جاري الإرسال... "+i+" من "+rows.length;
-fetch(SC,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({sheet:p.sheet,headers:hd,rows:rows.slice(i,i+B)})}).then(function(){i+=B;next()}).catch(function(){L.splice(0,i);drawList();$("msg").style.color="var(--danger)";$("msg").textContent="توقف الإرسال بعد "+i+" من "+rows.length+"، تأكد من الاتصال ثم اضغط إرسال الكل (المرسل سابقًا أُزيل من القائمة)"})})()};
+var btn=this;btn.disabled=true;$("msg").style.color="";var J=0,i=0,sent=0,B=300;
+function drop(job,c){var gone=job.items.slice(0,c);if(job.k=="other")OTHER=OTHER.filter(function(o){return gone.indexOf(o)<0});else LISTS[job.k]=LISTS[job.k].filter(function(a){return gone.indexOf(a)<0})}
+(function next(){if(J>=jobs.length){finish(n,0);return}var jb=jobs[J];if(i>=jb.rows.length){drop(jb,i);J++;i=0;next();return}
+$("msg").textContent="جاري الإرسال... "+sent+" من "+n;
+fetch(SC,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({sheet:jb.sheet,headers:jb.hd,rows:jb.rows.slice(i,i+B)})}).then(function(){var c=Math.min(B,jb.rows.length-i);i+=c;sent+=c;next()}).catch(function(){drop(jb,i);drawList();drawOther();$("msg").style.color="var(--danger)";$("msg").textContent="توقف الإرسال بعد "+sent+" من "+n+"، تأكد من الاتصال ثم اضغط إرسال الكل (المرسل سابقًا أُزيل من القوائم)"})})()};
 $("again").onclick=function(){$("done").hidden=true;$("lb").hidden=false};
 /* ===== لوحة التحكم ===== */
 var DASH={asset:{bar:"at",bt:"حسب نوع الأصل",don:"bu",dt:"حسب Business Unit",exp:"wy",et:"نهاية التصنيع / الدعم خلال 12 شهرًا",fl:"bu",fll:"Business Unit"},device:{bar:"stt",bt:"حسب نوع الموقع",don:"ss",dt:"حالة المواقع",exp:"ex",et:"انتهاء الأجهزة خلال 12 شهرًا",fl:"ss",fll:"الحالة"}};
