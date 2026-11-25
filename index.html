@@ -215,8 +215,7 @@ var g=guessAll(),ix={};TG.forEach(function(f){ix[f.k]=g[f.k]===undefined?-1:g[f.
 function recP(r,ix,pk){var fs=PF(pk),a={},miss=[],why="";
 fs.forEach(function(f){var c=ix[f.k],v=c>-1?String(r[c]).trim():"";if(!v&&pk==CUR&&PROF[pk].sh.indexOf(f)>-1)v=pageV(f);if(f.t=="sid"&&v)v=sid(v);a[f.k]=v});
 if(ix.la>-1&&!a.gp){var la=String(r[ix.la]).trim(),lo=ix.lo>-1?String(r[ix.lo]).trim():"";if(la&&lo)a.gp=la+", "+lo}
-if(pk=="asset"){if(a.bu){var b=canon(a.bu,Object.keys(SITES));if(!b)why="Business Unit غير مدرج: "+a.bu;else a.bu=b}
-if(!why&&a.st&&a.bu){var s=canon(a.st,SITES[a.bu]||[]);if(!s)why="Site type غير مدرج: "+a.st;else a.st=s}}
+if(pk=="asset"){var r2=fixAsset(a);why=r2}
 fs.forEach(function(f){if(why||f.t!="sel"||!a[f.k])return;var c=canon(a[f.k],f.o);if(!c)why=f.l+" غير مدرج: "+a[f.k];else a[f.k]=c});
 fs.forEach(function(f){var need=f.r||(f.t=="dp"&&DEPTS.length>0);if(need&&!a[f.k])miss.push(f.l)});
 return{a:a,miss:miss,why:why,ok:!miss.length&&!why}}
@@ -228,7 +227,7 @@ var stv=ixA.st>-1?String(r[ixA.st]).trim():"";if(stv&&Object.keys(SITES).some(fu
 return s}
 function xhead(){var seen={};return XHEAD.map(function(h,i){h=String(h).trim()||("عمود "+(i+1));var b=h,n=2;while(seen[h])h=b+" ("+(n++)+")";seen[h]=1;return h})}
 function classify(){var ixA=mapFor("asset"),ixD=mapFor("device"),out={asset:[],device:[],other:[]},hh=xhead(),d=new Date().toISOString().slice(0,10),fn=XFN;
-XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,ixD,"device"),pk,alt;
+XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,ixD,"device"),pk,alt;if(A.a.st&&!A.why&&Object.keys(SITES).some(function(b){return SITES[b].indexOf(A.a.st)>-1}))s.asset+=2;if(D.why&&!A.why)s.asset++;if(A.why&&!D.why)s.device++;
 if(!s.asset&&!s.device&&!A.ok&&!D.ok){out.other.push({h:hh,r:r.map(String),why:"لا يطابق قسم الأصول ولا الأجهزة",sug:"",d:d,f:fn});return}
 pk=s.asset>s.device?"asset":s.device>s.asset?"device":(A.ok&&!D.ok?"asset":D.ok&&!A.ok?"device":CUR);alt=pk=="asset"?"device":"asset";
 var R=pk=="asset"?A:D,RA=pk=="asset"?D:A;
@@ -242,6 +241,16 @@ var s={asset:0,device:0},N=Math.min(XROWS.length,300);for(var i=0;i<N;i++){var c
 if(s.asset!=s.device&&Math.max(s.asset,s.device)>=N)return s.asset>s.device?"asset":"device";
 if(ra!=rd)return ra>rd?"asset":"device";
 return s.asset>s.device?"asset":s.device>s.asset?"device":CUR}
+/* قراءة مرنة لقيم الأصول: BU و Site type و Site name */
+var NIX=null;function nameIx(){if(!NIX){NIX={};Object.keys(NAMES).forEach(function(t){NAMES[t].forEach(function(n){NIX[nz(n)]=t})})}return NIX}
+function buOf(v){var ks=Object.keys(SITES),c=canon(v,ks);if(c)return c;var n=nz(v);for(var i=0;i<ks.length;i++){var k=nz(ks[i]);if(n.indexOf(k)===0||n.indexOf(k)>-1&&n.length<=k.length+12)return ks[i]}return null}
+function stOf(v,bu){var bs=bu?[bu]:Object.keys(SITES);for(var i=0;i<bs.length;i++){var L=SITES[bs[i]],c=canon(v,L)||(bu?canon(bu+" "+v,L):null);if(c)return c}return null}
+function fixAsset(a){var bu=a.bu?buOf(a.bu):null;
+if(a.bu&&!bu)return "Business Unit غير مدرج: "+a.bu;
+var t=a.sn?nameIx()[nz(a.sn)]:null;
+if(a.st){var st=(!bu&&t&&nz(t).indexOf(nz(a.st))>-1)?t:stOf(a.st,bu);if(!st&&bu)return "Site type غير مدرج: "+a.st;if(st){a.st=st;if(!bu)bu=st.split(" ")[0]}}
+else if(t){a.st=t;if(!bu)bu=t.split(" ")[0]}
+if(bu)a.bu=bu;return ""}
 function auto(){return $("auto").checked}
 function drawOther(){var n=OTHER.length,m=50;$("ob").hidden=!n;$("ocnt").textContent=n;
 $("orows").innerHTML=OTHER.slice(0,m).map(function(o,i){var sm=o.h.map(function(h,j){return o.r[j]?h+": "+o.r[j]:""}).filter(Boolean).slice(0,4).join(" | ");return "<tr><td>"+(i+1)+"</td><td>"+esc(o.why)+"</td><td>"+esc(o.sug)+"</td><td>"+esc(sm)+"</td></tr>"}).join("");
