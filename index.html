@@ -129,7 +129,7 @@ device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدف�
 sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","text"),F("ds","الحي (District)","District","text"),F("gp","إحداثيات الموقع","Location coordinates","coord"),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","sel",1,["Ready","Issue","Issues","Hold"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel"),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
 rw:[F("dty","نوع الجهاز","Device Type","text",1),F("dsr","الرقم التسلسلي للجهاز","Device Serial Number","text",1),F("sty","نوع الحساس","Sensor type","text"),F("sim","الرقم التسلسلي للشريحة","Serial SIM","text"),F("ex","تاريخ انتهاء الجهاز","Equipment Expiry Date","date")]}};
 var AL={bu:["bu"],gp:["coord","location","احداث","إحداث"],la:["latitude","lat"],lo:["longitude","lng","lon"],dp:["department","إدارة","ادارة"],em:["email"],hl:["hotline","phone"],hl2:["additionalcontact","secondcontact","contact2","phone2"],em2:["additionalemail","secondemail","email2"],dsr:["deviceserial"],sim:["sim"],sty:["sensor"],ex:["expiry"],ar:["area"],ds:["district"],nt:["note"]};
-var OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
+var XFN="",OTHER=[],OSHEET="Unclassified",CUR="asset",LISTS={asset:[],device:[]},stL={n:0,p:0,s:25},DS={n:0,p:0,s:20,q:"",f:""},DV="asset",DATA=null,TG=[],XHEAD=[],XROWS=[],ALLN_=null;
 var MAPH='<div class="gb"><div class="map" id="map"><span>الخريطة تظهر بعد إدخال الإحداثيات</span></div><div><p class="hint" id="gh"></p><a id="gl" href="#" target="_blank" rel="noopener" hidden>فتح في خرائط Google</a></div></div>';
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -226,7 +226,7 @@ var sv=ixD.stt>-1?String(r[ixD.stt]).trim():"";if(sv&&canon(sv,PROF.device.sh.fi
 var stv=ixA.st>-1?String(r[ixA.st]).trim():"";if(stv&&Object.keys(SITES).some(function(b){return canon(stv,SITES[b])}))s.asset+=2;
 return s}
 function xhead(){var seen={};return XHEAD.map(function(h,i){h=String(h).trim()||("عمود "+(i+1));var b=h,n=2;while(seen[h])h=b+" ("+(n++)+")";seen[h]=1;return h})}
-function classify(){var ixA=mapFor("asset"),ixD=mapFor("device"),out={asset:[],device:[],other:[]},hh=xhead(),d=new Date().toISOString().slice(0,10),fn=($("xf").files[0]||{}).name||"";
+function classify(){var ixA=mapFor("asset"),ixD=mapFor("device"),out={asset:[],device:[],other:[]},hh=xhead(),d=new Date().toISOString().slice(0,10),fn=XFN;
 XROWS.forEach(function(r){var s=score(r,ixA,ixD),A=recP(r,ixA,"asset"),D=recP(r,ixD,"device"),pk,alt;
 if(!s.asset&&!s.device&&!A.ok&&!D.ok){out.other.push({h:hh,r:r.map(String),why:"لا يطابق قسم الأصول ولا الأجهزة",sug:"",d:d,f:fn});return}
 pk=s.asset>s.device?"asset":s.device>s.asset?"device":(A.ok&&!D.ok?"asset":D.ok&&!A.ok?"device":CUR);alt=pk=="asset"?"device":"asset";
@@ -235,6 +235,12 @@ if(R.ok){out[pk].push(R.a);return}
 if(RA.ok&&s[alt]>0){out[alt].push(RA.a);return}
 out.other.push({h:hh,r:r.map(String),why:R.why||("ناقص: "+R.miss.join("، ")),sug:PROF[pk].t,d:d,f:fn})});
 return out}
+function reqMapped(ix,pk){return PF(pk).filter(function(f){return f.r&&ix[f.k]>-1}).length}
+function detect(){var ixA=mapFor("asset"),ixD=mapFor("device"),ra=reqMapped(ixA,"asset"),rd=reqMapped(ixD,"device");
+var s={asset:0,device:0},N=Math.min(XROWS.length,300);for(var i=0;i<N;i++){var c=score(XROWS[i],ixA,ixD);s.asset+=c.asset;s.device+=c.device}
+if(s.asset!=s.device&&Math.max(s.asset,s.device)>=N)return s.asset>s.device?"asset":"device";
+if(ra!=rd)return ra>rd?"asset":"device";
+return s.asset>s.device?"asset":s.device>s.asset?"device":CUR}
 function auto(){return $("auto").checked}
 function drawOther(){var n=OTHER.length,m=50;$("ob").hidden=!n;$("ocnt").textContent=n;
 $("orows").innerHTML=OTHER.slice(0,m).map(function(o,i){var sm=o.h.map(function(h,j){return o.r[j]?h+": "+o.r[j]:""}).filter(Boolean).slice(0,4).join(" | ");return "<tr><td>"+(i+1)+"</td><td>"+esc(o.why)+"</td><td>"+esc(o.sug)+"</td><td>"+esc(sm)+"</td></tr>"}).join("");
@@ -267,13 +273,13 @@ var r=new FileReader();r.onload=function(e){try{var wb=XLSX.read(new Uint8Array(
 var a=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:"yyyy-mm-dd",defval:""});
 a=a.filter(function(x){return x.some(function(c){return String(c).trim()!==""})});
 if(a.length<2){xm("الملف فاضي أو ما فيه صفوف بيانات",1);return}
-XHEAD=a[0].map(String);XROWS=a.slice(1);bmap();xm("تمت قراءة "+XROWS.length+" صف. راجع الأعمدة المقابلة وصحّح العناوين إن لزم ثم اضغط إضافة",0)}catch(err){xm("تعذر قراءة الملف",1)}};r.readAsArrayBuffer(f)};
+XHEAD=a[0].map(String);XROWS=a.slice(1);XFN=f.name;$("mp").hidden=true;var dp=detect(),sw=dp!=CUR;if(sw){CUR=dp;build()}bmap();xm("تمت قراءة "+XROWS.length+" صف، وتم التعرف على الملف كـ: "+PROF[CUR].t+(sw?" (تم التحويل تلقائيًا)":"")+". راجع الأعمدة المقابلة ثم اضغط إضافة",0)}catch(err){xm("تعذر قراءة الملف",1)}};r.readAsArrayBuffer(f)};
 $("xadd").onclick=function(){if(auto()){var c=classify();c.asset.forEach(function(a){LISTS.asset.push(a)});c.device.forEach(function(a){LISTS.device.push(a)});c.other.forEach(function(o){OTHER.push(o)});
 xm("أصول: "+c.asset.length+"، أجهزة: "+c.device.length+"، غير مصنّف / غير مدرج: "+c.other.length,c.other.length?1:0);
 $("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList();drawOther();return}
 var ix=MV(),need=P().sh.filter(function(f){return req(f)&&ix[f.k]<0&&!pageV(f)});
 if(need.length){xm("بيانات مشتركة ناقصة: اربطها بعمود من الملف أو عبّها من الصفحة",1);flag(need.map(function(f){return f.k}));return}
-var ad=0,sk=0,hh=xhead(),dd=new Date().toISOString().slice(0,10),fn=($("xf").files[0]||{}).name||"";XROWS.forEach(function(r){var a=rowObj(r,ix);if(a){LIST().push(a);ad++}else{sk++;OTHER.push({h:hh,r:r.map(String),why:"بيانات ناقصة",sug:P().t,d:dd,f:fn})}});drawOther();
+var ad=0,sk=0,hh=xhead(),dd=new Date().toISOString().slice(0,10),fn=XFN;XROWS.forEach(function(r){var a=rowObj(r,ix);if(a){LIST().push(a);ad++}else{sk++;OTHER.push({h:hh,r:r.map(String),why:"بيانات ناقصة",sug:P().t,d:dd,f:fn})}});drawOther();
 xm("تمت إضافة "+ad+" سجل للقائمة"+(sk?"، و"+sk+" سجل ناقص راح لقائمة غير المصنّف":""),sk?1:0);
 $("mp").hidden=true;$("xf").value="";setTags();stL.p=0;$("lb").hidden=false;$("done").hidden=true;drawList()};
 function finish(n,pv){LISTS.asset=[];LISTS.device=[];OTHER=[];drawOther();stL.p=0;$("lb").hidden=true;$("done").hidden=false;$("dn").textContent="تم إرسال "+n+" سجل بنجاح"+(pv?" (معاينة: لم تُرسل البيانات فعليًا)":"");$("msg").textContent="";drawList()}
