@@ -131,7 +131,7 @@ var DEPTS=[],ASSET_NAMES=[];
 function F(k,l,h,t,r,o,x){return{k:k,l:l,h:h,t:t,r:r,o:o,x:x}}
 var PROF={
 asset:{t:"أصل (Asset)",d:"مضخات، عدادات، صمامات، لوحات... داخل المواقع",sheet:"Assets",rt:"بيانات الأصل",
-sh:[F("dp","الإدارة","Department","dp"),F("bu","Business Unit","Business unit","bu",1),F("st","Site type","Site type","st",1),F("sn","Site name","Site name","sn",1)],
+sh:[F("dp","الإدارة","Department","combo"),F("bu","Business Unit","Business unit","bu",1),F("st","Site type","Site type","st",1),F("sn","Site name","Site name","sn",1)],
 rw:[F("at","نوع الأصل","Asset type","text",1),F("an","اسم الأصل","Asset name","combo",1),F("si","Site ID","Site ID","sid"),F("sr","الرقم التسلسلي","Serial Number","text",1),F("dt","تاريخ التركيب","Installation date","date"),F("wy","نهاية التصنيع / الدعم (EOL / EOS)","EOL / EOS date","date"),F("mc","رقم تواصل المصنّع","Manufacturer contact","tel",1),F("mc2","رقم تواصل إضافي للمصنّع","Additional manufacturer contact","tel",0,0,"mc"),F("gp","الإحداثيات","Coordinates","coord",1),F("nt","ملاحظات","Notes","area")]},
 device:{t:"موقع / جهاز مراقبة",d:"مواقع القياس: تدفق، ضغط، PRV، صمامات... مع أجهزتها",sheet:"Devices",rt:"بيانات الجهاز",
 sh:[F("sn","Site Name","Site Name","combo",1),F("si","Site ID","Site ID","sid",1),F("ar","المنطقة (Area)","Area","combo"),F("ds","الحي (District)","District","combo"),F("gp","إحداثيات الموقع","Location coordinates","coord",1),F("stt","نوع الموقع","Site Type","sel",1,["Flow","FLM","Pressure","PRV","Valve"]),F("ss","حالة الموقع","Site Status","seg",1,["Issues","Hold","Ready"]),F("em","البريد الفني للدعم","Technical Support Emails","email"),F("em2","بريد إضافي","Additional email","email",0,0,"em"),F("hl","رقم التواصل","Contact number","tel",1),F("hl2","رقم تواصل إضافي","Additional contact number","tel",0,0,"hl")],
@@ -173,6 +173,7 @@ $("lb").hidden=false;$("done").hidden=true;stL.p=0;geo();drawList()}
 function dl(){ALLF().forEach(function(f){var d=$("dl_"+f.k);if(!d)return;var a=[];
 if(f.t=="sn")a=NAMES[$("f_st").value]||[];
 else if(f.k=="sn")a=ALLN();
+else if(f.k=="dp"){var o3={"Smart Operation":1};LISTS.asset.concat(DATA&&DATA.asset||[]).forEach(function(x){if(x.dp&&x.dp!=NA)o3[x.dp]=1});a=Object.keys(o3)}
 else if(f.k=="ar"){var o2={};AREAS.concat(vals("ar")).forEach(function(x){o2[x]=1});a=Object.keys(o2)}
 else if(f.k=="ds")a=vals("ds");
 else if(f.k=="an"){var o={};ASSET_NAMES.concat(LIST().map(function(x){return x.an})).forEach(function(x){if(x)o[x]=1});a=Object.keys(o).sort()}
